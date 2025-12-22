@@ -1,4 +1,4 @@
-# My Top Tracks Archiver
+# Top Tracks Archiver
 
 A script to back up your top songs of the month to a private playlist at the end of each month.
 
