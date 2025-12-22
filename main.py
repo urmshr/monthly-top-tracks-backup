@@ -50,8 +50,8 @@ def main():
     sp = get_spotify_client()
     user_id = sp.me()["id"]
 
-    # 2. Fetch long-term top 50 tracks
-    top_tracks = sp.current_user_top_tracks(limit=50, time_range="long_term")
+    # 2. Fetch recent (approximately last 4 weeks) top 50 tracks
+    top_tracks = sp.current_user_top_tracks(limit=50, time_range="short_term")
 
     track_uris = [track["uri"] for track in top_tracks["items"]]
 
@@ -67,7 +67,7 @@ def main():
         user=user_id,
         name=playlist_name,
         public=False,
-        description=f"Automated backup of my long term top tracks for {date_str}",
+        description=f"Automated backup of my short term (approximately last 4 weeks) top tracks for {date_str}",
     )
 
     # 4. Add tracks to playlist
