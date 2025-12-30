@@ -1,8 +1,8 @@
 # Top Tracks Archiver
 
-A script to back up your top songs of the month to a private playlist at the end of each month.
+A script to save the month's top songs to a Spotify playlist at the end of each month.
 
-## Environment Variables
+## Environment variables
 
 - `SPOTIPY_CLIENT_ID`
 - `SPOTIPY_CLIENT_SECRET`
