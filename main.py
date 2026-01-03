@@ -47,33 +47,52 @@ def main():
         return
 
     print("Starting Monthly Top Tracks Backup...")
+    today = datetime.now()
     sp = get_spotify_client()
     user_id = sp.me()["id"]
 
-    # 2. Fetch recent (approximately last 4 weeks) top 50 tracks
-    top_tracks = sp.current_user_top_tracks(limit=50, time_range="short_term")
+    if today.month == 12:
+        time_ranges = ["short_term", "medium_term", "long_term"]
+    elif today.month == 6:
+        time_ranges = ["short_term", "medium_term"]
+    else:
+        time_ranges = ["short_term"]
 
-    track_uris = [track["uri"] for track in top_tracks["items"]]
+    term_labels = {
+        "short_term": "last ~4 weeks",
+        "medium_term": "last ~6 months",
+        "long_term": "last ~1 year",
+    }
+    term_names = {
+        "short_term": "short-term",
+        "medium_term": "medium-term",
+        "long_term": "long-term",
+    }
 
-    if not track_uris:
-        print("No tracks found. Exiting.")
-        return
+    # 2. Fetch top 50 tracks and create playlists per time range
+    date_str = today.strftime("%Y-%m")
+    for time_range in time_ranges:
+        top_tracks = sp.current_user_top_tracks(limit=50, time_range=time_range)
+        track_uris = [track["uri"] for track in top_tracks["items"]]
 
-    # 3. Create playlist
-    date_str = datetime.now().strftime("%Y-%m")
-    playlist_name = f"Top Tracks ({date_str})"
+        if not track_uris:
+            print(f"No tracks found for {time_range}. Skipping...")
+            continue
 
-    new_playlist = sp.user_playlist_create(
-        user=user_id,
-        name=playlist_name,
-        public=False,
-        description=f"Automated backup of my short term (approximately last 4 weeks) top tracks for {date_str}",
-    )
+        term_label = term_labels[time_range]
+        playlist_name = f"Top Tracks ({date_str}) - {term_names[time_range]}"
 
-    # 4. Add tracks to playlist
-    sp.playlist_add_items(new_playlist["id"], track_uris)
+        new_playlist = sp.user_playlist_create(
+            user=user_id,
+            name=playlist_name,
+            public=False,
+            description=f"Automated backup of my top tracks from the {term_label} for {date_str}",
+        )
 
-    print(f"Successfully created playlist: {playlist_name}")
+        # 3. Add tracks to playlist
+        sp.playlist_add_items(new_playlist["id"], track_uris)
+
+        print(f"Successfully created playlist: {playlist_name}")
 
 
 if __name__ == "__main__":
