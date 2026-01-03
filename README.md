@@ -1,4 +1,4 @@
-# Top Tracks Archiver
+# Monthly Top Tracks Backup
 
 A script to save the month's top songs to a Spotify playlist at the end of each month.
 
