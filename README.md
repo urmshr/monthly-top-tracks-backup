@@ -18,7 +18,8 @@ A script to save the month's top songs to a Spotify playlist at the end of each 
 ## Disclaimer
 
 - "Spotify" is a trademark or registered trademark of Spotify AB. This project is not affiliated with Spotify AB in any way.
-- This project is intended for personal use only.
+- This tool is intended for each user to run on their own Spotify account.
+- Compliance with Spotify's Terms of Service and Developer Policy is the user's responsibility.
 
 ## License
 
