@@ -34,10 +34,14 @@ def get_spotify_client():
         open_browser=False,
     )
 
-    # Set the refresh token
-    auth_manager.refresh_access_token(refresh_token)
+    # Refresh the access token and use it for this run.
+    token_info = auth_manager.refresh_access_token(refresh_token)
+    access_token = token_info.get("access_token")
+    if not access_token:
+        print("Error: Failed to refresh access token.")
+        sys.exit(1)
 
-    return spotipy.Spotify(auth_manager=auth_manager)
+    return spotipy.Spotify(auth=access_token)
 
 
 def main():
@@ -63,11 +67,7 @@ def main():
         "medium_term": "last ~6 months",
         "long_term": "last ~1 year",
     }
-    term_names = {
-        "short_term": "short-term",
-        "medium_term": "medium-term",
-        "long_term": "long-term",
-    }
+
 
     # 2. Fetch top 50 tracks and create playlists per time range
     date_str_short = today.strftime("%Y%m")
@@ -88,11 +88,12 @@ def main():
 
         term_label = term_labels[time_range]
         if time_range == "short_term":
-            playlist_name = f"Top Tracks ({date_str_short})"
+            date_str = date_str_short
         elif time_range == "medium_term":
-            playlist_name = f"Top Tracks ({date_str_medium})"
+            date_str = date_str_medium
         else:
-            playlist_name = f"Top Tracks ({date_str_long})"
+            date_str = date_str_long
+        playlist_name = f"Top Tracks ({date_str})"
 
         new_playlist = sp.user_playlist_create(
             user=user_id,
