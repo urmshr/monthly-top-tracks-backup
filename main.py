@@ -68,7 +68,6 @@ def main():
         "long_term": "last ~1 year",
     }
 
-
     # 2. Fetch top 50 tracks and create playlists per time range
     date_str_short = today.strftime("%Y%m")
     date_str_long = today.strftime("%Y")
@@ -76,8 +75,6 @@ def main():
         date_str_medium = f"{today.year}01-{today.year}06"
     elif today.month == 12:
         date_str_medium = f"{today.year}07-{today.year}12"
-    else:
-        date_str_medium = f"Mid {today.strftime('%Y')}"
     for time_range in time_ranges:
         top_tracks = sp.current_user_top_tracks(limit=50, time_range=time_range)
         track_uris = [track["uri"] for track in top_tracks["items"]]
