@@ -1,8 +1,12 @@
+import argparse
 import os
 import sys
 from datetime import datetime, timedelta
 import spotipy
+from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyOAuth
+
+load_dotenv()
 
 
 def is_last_day_of_month():
@@ -45,8 +49,12 @@ def get_spotify_client():
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--force", action="store_true", help="Skip the last-day-of-month check")
+    args = parser.parse_args()
+
     # 1. Check if today is the last day of the month
-    if not is_last_day_of_month():
+    if not args.force and not is_last_day_of_month():
         print("Today is not the last day of the month. Skipping...")
         return
 
