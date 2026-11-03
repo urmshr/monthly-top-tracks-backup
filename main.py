@@ -9,7 +9,8 @@ from spotipy.oauth2 import SpotifyOAuth
 load_dotenv()
 
 # Also used by get_refresh_token.py, so the issued token has these permissions.
-SCOPE = "user-top-read playlist-modify-private"
+# playlist-read-private is needed to see the (private) backup playlists when skipping existing ones.
+SCOPE = "user-top-read playlist-modify-private playlist-read-private"
 
 
 def get_target_month():
