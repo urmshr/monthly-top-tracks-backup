@@ -1,21 +1,21 @@
-import argparse
 import os
 import sys
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
 import spotipy
 from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyOAuth
 
 load_dotenv()
 
+JST = ZoneInfo("Asia/Tokyo")
 
-def is_last_day_of_month():
-    """Return True if today is the last day of the month."""
-    today = datetime.now()
-    # Get tomorrow's date
-    next_day = today + timedelta(days=1)
-    # If tomorrow is the first day of next month, today is the last day
-    return next_day.day == 1
+
+def get_target_month():
+    """Return a date in the previous month (JST), which is the month to back up."""
+    first_of_this_month = datetime.now(JST).replace(day=1)
+    return first_of_this_month - timedelta(days=1)
 
 
 def get_spotify_client():
@@ -49,23 +49,15 @@ def get_spotify_client():
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--force", action="store_true", help="Skip the last-day-of-month check")
-    args = parser.parse_args()
-
-    # 1. Check if today is the last day of the month
-    if not args.force and not is_last_day_of_month():
-        print("Today is not the last day of the month. Skipping...")
-        return
-
-    print("Starting Monthly Top Tracks Backup...")
-    today = datetime.now()
+    # 1. Back up the previous month (the workflow runs on the 1st, JST)
+    target = get_target_month()
+    print(f"Starting Monthly Top Tracks Backup for {target:%Y-%m}...")
     sp = get_spotify_client()
     user_id = sp.me()["id"]
 
-    if today.month == 12:
+    if target.month == 12:
         time_ranges = ["short_term", "medium_term", "long_term"]
-    elif today.month == 6:
+    elif target.month == 6:
         time_ranges = ["short_term", "medium_term"]
     else:
         time_ranges = ["short_term"]
@@ -77,12 +69,12 @@ def main():
     }
 
     # 2. Fetch top 50 tracks and create playlists per time range
-    date_str_short = today.strftime("%Y%m")
-    date_str_long = today.strftime("%Y")
-    if today.month == 6:
-        date_str_medium = f"{today.year}01-{today.year}06"
-    elif today.month == 12:
-        date_str_medium = f"{today.year}07-{today.year}12"
+    date_str_short = target.strftime("%Y%m")
+    date_str_long = target.strftime("%Y")
+    if target.month == 6:
+        date_str_medium = f"{target.year}01-{target.year}06"
+    elif target.month == 12:
+        date_str_medium = f"{target.year}07-{target.year}12"
     for time_range in time_ranges:
         top_tracks = sp.current_user_top_tracks(limit=50, time_range=time_range)
         track_uris = [track["uri"] for track in top_tracks["items"]]

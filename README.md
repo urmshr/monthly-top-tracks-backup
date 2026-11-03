@@ -1,12 +1,16 @@
 # Monthly Top Tracks Backup
 
-A script to save the month's top songs to a Spotify playlist at the end of each month.
+A script that runs on the 1st of each month (JST) and saves the previous month's top songs to a Spotify playlist.
 
 ## Monthly behavior
+
+The month below is the month being backed up.
 
 - Regular months: creates a short-term (last ~4 weeks) playlist.
 - June: creates short-term and medium-term (last ~6 months) playlists.
 - December: creates short-term, medium-term, and long-term (last ~1 year) playlists.
+
+Every run creates new playlists, so triggering the workflow manually twice in a month duplicates them.
 
 ## Environment variables
 

@@ -2,7 +2,10 @@ name: Monthly 50 Tracks Backup
 
 on:
   schedule:
-    - cron: "0 15 28-31 * *"
+    # 1st of every month, 00:17 JST: back up the previous month.
+    # Off the top of the hour to avoid GitHub's scheduler peak.
+    - cron: "17 0 1 * *"
+      timezone: "Asia/Tokyo"
   workflow_dispatch:
 
 jobs:
