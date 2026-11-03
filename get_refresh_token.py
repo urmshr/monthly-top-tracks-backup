@@ -3,10 +3,9 @@ import sys
 from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyOAuth
 
-load_dotenv()
+from main import SCOPE
 
-# Must match the scope used in main.py so the issued token has the same permissions.
-SCOPE = "user-top-read playlist-modify-private"
+load_dotenv()
 
 
 def main():

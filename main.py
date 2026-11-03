@@ -8,6 +8,9 @@ from spotipy.oauth2 import SpotifyOAuth
 
 load_dotenv()
 
+# Also used by get_refresh_token.py, so the issued token has these permissions.
+SCOPE = "user-top-read playlist-modify-private"
+
 
 def get_target_month():
     """Return a date in the previous month, which is the month to back up.
@@ -35,7 +38,7 @@ def get_spotify_client():
         client_id=client_id,
         client_secret=client_secret,
         redirect_uri=redirect_uri,
-        scope="user-top-read playlist-modify-private",
+        scope=SCOPE,
         open_browser=False,
     )
 
@@ -47,6 +50,16 @@ def get_spotify_client():
         sys.exit(1)
 
     return spotipy.Spotify(auth=access_token)
+
+
+def get_existing_playlist_names(sp):
+    """Return the names of all playlists in the current user's library."""
+    names = set()
+    page = sp.current_user_playlists(limit=50)
+    while page:
+        names.update(p["name"] for p in page["items"] if p)
+        page = sp.next(page) if page["next"] else None
+    return names
 
 
 def main():
@@ -75,14 +88,10 @@ def main():
         date_str_medium = f"{target.year}01-{target.year}06"
     elif target.month == 12:
         date_str_medium = f"{target.year}07-{target.year}12"
+    # Skip playlists that already exist, so retries and manual re-runs don't duplicate them.
+    existing_names = get_existing_playlist_names(sp)
+
     for time_range in time_ranges:
-        top_tracks = sp.current_user_top_tracks(limit=50, time_range=time_range)
-        track_uris = [track["uri"] for track in top_tracks["items"]]
-
-        if not track_uris:
-            print(f"No tracks found for {time_range}. Skipping...")
-            continue
-
         term_label = term_labels[time_range]
         if time_range == "short_term":
             date_str = date_str_short
@@ -91,6 +100,17 @@ def main():
         else:
             date_str = date_str_long
         playlist_name = f"Top Tracks ({date_str})"
+
+        if playlist_name in existing_names:
+            print(f"Playlist already exists: {playlist_name}. Skipping...")
+            continue
+
+        top_tracks = sp.current_user_top_tracks(limit=50, time_range=time_range)
+        track_uris = [track["uri"] for track in top_tracks["items"]]
+
+        if not track_uris:
+            print(f"No tracks found for {time_range}. Skipping...")
+            continue
 
         # POST /me/playlists: POST /users/{id}/playlists is unavailable to
         # Development Mode apps created after Spotify's February 2026 changes.

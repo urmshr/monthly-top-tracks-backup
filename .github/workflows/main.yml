@@ -2,9 +2,10 @@ name: Monthly 50 Tracks Backup
 
 on:
   schedule:
-    # 1st of every month, 00:17 local time: back up the previous month.
+    # 1st of every month at 00:17 and 12:17 local time: back up the previous month.
+    # The second run is a retry in case the first is dropped; existing playlists are skipped.
     # Off the top of the hour to avoid GitHub's scheduler peak.
-    - cron: "17 0 1 * *"
+    - cron: "17 0,12 1 * *"
       timezone: "Asia/Tokyo" # Keep in sync with env.TZ below.
   workflow_dispatch:
 
@@ -12,9 +13,15 @@ env:
   # Decides which month is "the previous month". Keep in sync with the schedule timezone above.
   TZ: Asia/Tokyo
 
+# Never run two backups at once, so the existing-playlist check can't race.
+concurrency:
+  group: backup
+
 jobs:
   backup:
     runs-on: ubuntu-latest
+    # Fail fast instead of hanging for hours if Spotify asks for a long Retry-After.
+    timeout-minutes: 10
     permissions:
       contents: read
 

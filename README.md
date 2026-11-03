@@ -10,7 +10,7 @@ The month below is the month being backed up.
 - June: creates short-term and medium-term (last ~6 months) playlists.
 - December: creates short-term, medium-term, and long-term (last ~1 year) playlists.
 
-Every run creates new playlists, so triggering the workflow manually twice in a month duplicates them.
+Playlists that already exist are skipped, so re-running is safe.
 
 ## Setup
 
