@@ -1,6 +1,6 @@
 # Monthly Top Tracks Backup
 
-A script that runs on the 1st of each month (JST) and saves the previous month's top songs to a Spotify playlist.
+A GitHub Actions workflow that runs on the 1st of each month and saves the previous month's top songs to private Spotify playlists.
 
 ## Monthly behavior
 
@@ -12,21 +12,25 @@ The month below is the month being backed up.
 
 Every run creates new playlists, so triggering the workflow manually twice in a month duplicates them.
 
-## Environment variables
+## Setup
 
-- `SPOTIPY_CLIENT_ID`
-- `SPOTIPY_CLIENT_SECRET`
-- `SPOTIPY_REDIRECT_URI`
-- `SPOTIPY_REFRESH_TOKEN`
+Requires Spotify Premium (for Development Mode apps).
 
-## Refresh token
+1. Create an app in the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) with redirect URI `http://127.0.0.1:8888/callback`.
+2. Set `SPOTIPY_CLIENT_ID`, `SPOTIPY_CLIENT_SECRET` and `SPOTIPY_REDIRECT_URI` in `.env`, then:
 
-Generate it locally (and regenerate it when it expires) with the other three variables set in `.env`:
+   ```sh
+   pip install -r requirements.txt
+   python get_refresh_token.py  # prints the refresh token
+   gh secret set -f .env
+   gh secret set SPOTIPY_REFRESH_TOKEN
+   ```
 
-```sh
-python get_refresh_token.py
-gh secret set SPOTIPY_REFRESH_TOKEN  # paste the printed token
-```
+3. On a fork, enable workflows in the Actions tab.
+
+If the refresh token expires, re-run `get_refresh_token.py` and `gh secret set SPOTIPY_REFRESH_TOKEN`.
+
+To change the timezone (default `Asia/Tokyo`), edit both `timezone` and `env.TZ` in `.github/workflows/main.yml`.
 
 ## Disclaimer
 

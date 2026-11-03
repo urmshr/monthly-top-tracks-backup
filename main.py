@@ -1,7 +1,6 @@
 import os
 import sys
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 
 import spotipy
 from dotenv import load_dotenv
@@ -9,12 +8,14 @@ from spotipy.oauth2 import SpotifyOAuth
 
 load_dotenv()
 
-JST = ZoneInfo("Asia/Tokyo")
-
 
 def get_target_month():
-    """Return a date in the previous month (JST), which is the month to back up."""
-    first_of_this_month = datetime.now(JST).replace(day=1)
+    """Return a date in the previous month, which is the month to back up.
+
+    Uses local time, so the timezone comes from the TZ environment variable
+    (set in the workflow) or the machine's timezone when run locally.
+    """
+    first_of_this_month = datetime.now().replace(day=1)
     return first_of_this_month - timedelta(days=1)
 
 
@@ -49,11 +50,10 @@ def get_spotify_client():
 
 
 def main():
-    # 1. Back up the previous month (the workflow runs on the 1st, JST)
+    # 1. Back up the previous month (the workflow runs on the 1st)
     target = get_target_month()
     print(f"Starting Monthly Top Tracks Backup for {target:%Y-%m}...")
     sp = get_spotify_client()
-    user_id = sp.me()["id"]
 
     if target.month == 12:
         time_ranges = ["short_term", "medium_term", "long_term"]
@@ -92,8 +92,9 @@ def main():
             date_str = date_str_long
         playlist_name = f"Top Tracks ({date_str})"
 
-        new_playlist = sp.user_playlist_create(
-            user=user_id,
+        # POST /me/playlists: POST /users/{id}/playlists is unavailable to
+        # Development Mode apps created after Spotify's February 2026 changes.
+        new_playlist = sp.current_user_playlist_create(
             name=playlist_name,
             public=False,
             description=f"Automated backup of my top tracks from the {term_label} for {date_str}",
