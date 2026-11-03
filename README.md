@@ -15,6 +15,15 @@ A script to save the month's top songs to a Spotify playlist at the end of each 
 - `SPOTIPY_REDIRECT_URI`
 - `SPOTIPY_REFRESH_TOKEN`
 
+## Refresh token
+
+Generate it locally (and regenerate it when it expires) with the other three variables set in `.env`:
+
+```sh
+python get_refresh_token.py
+gh secret set SPOTIPY_REFRESH_TOKEN  # paste the printed token
+```
+
 ## Disclaimer
 
 - "Spotify" is a trademark or registered trademark of Spotify AB. This project is not affiliated with Spotify AB in any way.
